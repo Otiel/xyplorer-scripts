@@ -1,4 +1,4 @@
-# XYplorer scripts
+# ![Logo](https://i.imgur.com/KtnTc6C.png) XYplorer scripts
 
 ## Description
 
