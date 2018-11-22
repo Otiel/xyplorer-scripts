@@ -1,0 +1,16 @@
+/* Copies the selected items to F:
+ */
+ "CopyToF"
+    // Check if there's a file/folder selected
+    if (Get("CountSelected") == 0) {
+        End(1);
+    }
+
+    // Check if destination path exists
+    if (Exists("F:") != 2) {
+        Msg("Cannot copy to F:<br>Path is unreachable.", 16);
+        End(1);
+    }
+
+    // Copy selected items
+    CopyAs("*.?", "F:\");

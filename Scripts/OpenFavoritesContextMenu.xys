@@ -1,0 +1,18 @@
+/* Opens a context menu containing favorites folders and favorites files.
+ *
+ * Can be used in replacement of the treeview context menu by changing the following tweak:
+ *      ; Tweak: 0=Favs, 1=Favs Full, 2=Drives, 3=Drives+Special, 4=Tabs, 5=FavFiles, 6=Script
+ *      CEA_TreeRightClickOnWhite=0
+ *      CEA_TreeRightClickOnWhite_Script=
+ * to:
+ *      ; Tweak: 0=Favs, 1=Favs Full, 2=Drives, 3=Drives+Special, 4=Tabs, 5=FavFiles, 6=Script
+ *      CEA_TreeRightClickOnWhite=6
+ *      CEA_TreeRightClickOnWhite_Script=load "<xyscripts>\OpenFavoritesContextMenu.xys"
+ */
+ "OpenFavoritesContextMenu"
+    // Compute the list of favorites folder and favorites files
+    $favs = Favs('d') . "<crlf>-<crlf>" . Favs('f');
+    // Display the list
+    Load("$favs", * , 's');
+    // Focus the list
+    Focus("L");
