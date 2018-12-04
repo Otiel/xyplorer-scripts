@@ -1,0 +1,55 @@
+/* Opens a list containing favorites folders and files to quickly go to the selected favorite.
+ */
+"OpenFavorite"
+    // Get favorites folders and files
+    $favorites = Favs('d',, '|') . '|' .  Favs('f',, '|');
+    $prunedFavorites = "";
+
+    // Remove captions and separators "-" from favorites
+    foreach ($favorite, $favorites, '|') {
+        if ($favorite != "-") {
+            // Remove captions
+            $prunedFavorites = $prunedFavorites . RegexReplace($favorite, "("".+"") *(.+)", "$2") . '|';
+        }
+    }
+    $prunedFavorites = SubStr($prunedFavorites, 0, -1);
+
+    // Ask the user to select an item
+    $selectedFavorite = InputSelect("Open favorite folder / file" . <crlf> . "Press Shift to open a folder in a new tab." . <crlf> . "Press Ctrl when selecting a file to open its parent folder.", $prunedFavorites, '|', 1+32+64+4096,, 800, 500, "Open favorite");
+
+    // Get pressed modifiers
+    $modifierShiftPressed = false;
+    $modifierCtrlPressed = false;
+    if (Get("Shift") == 1) {
+        $modifierShiftPressed = true;
+    } elseif (Get("Shift") == 2) {
+        $modifierCtrlPressed = true;
+    } elseif (Get("Shift") == 3) {
+        $modifierShiftPressed = true;
+        $modifierCtrlPressed = true;
+    }
+
+    if (Exists($selectedFavorite) == 1) {
+        // This is a file
+        if ($modifierCtrlPressed && $modifierShiftPressed) {
+            // Open parent folder in new tab
+            Tab("new", GetPathComponent($selectedFavorite, "path"));
+        } elseif ($modifierCtrlPressed && !$modifierShiftPressed) {
+            // Open parent folder in current tab
+            Goto(GetPathComponent($selectedFavorite, "path"));
+        } else {
+            // Open file
+            open $selectedFavorite;
+        }
+    } elseif (Exists($selectedFavorite) == 2) {
+        // This is a folder or drive
+        if ($modifierShiftPressed) {
+            // Open in new tab
+            Tab("new", $selectedFavorite);
+        } else {
+            // Open in current tab
+            Goto($selectedFavorite);
+        }
+    } else {
+        Msg("The selected item does not exist.", 16);
+    }
