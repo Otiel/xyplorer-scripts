@@ -65,12 +65,23 @@
     // Get item type (file / folder)
     if (Exists($selectedItem) == 1) {
         // This is a file
+        $selectedItemExist = true;
         $selectedItemIsAFile = true;
     } elseif (Exists($selectedItem) == 2) {
         // This is a folder or drive
+        $selectedItemExist = true;
         $selectedItemIsAFile = false;
     } else {
-        Msg("The selected item does not exist.", 16);
+        // Item doesn't exist
+        $selectedItemExist = false;
+    }
+
+    if (!$selectedItemExist) {
+        Msg("The selected item does not exist. Would you like to remove it from the favorites?" . <crlf> . <crlf> . $selectedItem, 32 + 1); // Script will end if user clicks on Cancel
+        // We have no way of knowing if the item was a file or a folder, so try to remove it from both lists
+        Favs('f', $selectedItem, , 'd');
+        Favs('d', $selectedItem, , 'd');
+        Status("Removed from favorites: " . $selectedItem, "0078D7" , "ready");
         End(true);
     }
 
