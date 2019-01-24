@@ -1,6 +1,9 @@
 /* Opens a list containing favorites folders and files to quickly go to the selected favorite.
  */
 "OpenFavorite"
+    // Constants
+    $blue = "106FCD";
+
     // Get favorite folders
     $favoriteFolders = "";
     foreach ($favoriteFolder, Favs('d',, '|'), '|', 'e') {
@@ -81,7 +84,7 @@
         // We have no way of knowing if the item was a file or a folder, so try to remove it from both lists
         Favs('f', $selectedItem, , 'd');
         Favs('d', $selectedItem, , 'd');
-        Status("Removed from favorites: " . $selectedItem, "0078D7" , "ready");
+        Status("Removed from favorites: " . $selectedItem, $blue, "ready");
         End(true);
     }
 
@@ -90,13 +93,13 @@
             // Remove file from favorites
             Msg("Remove the following file from the favorites?" . <crlf> . <crlf> . $selectedItem, 32 + 1); // Script will end if user clicks on Cancel
             Favs('f', $selectedItem, , 'd');
-            Status("Removed from favorite files: " . $selectedItem, "0078D7" , "ready");
+            Status("Removed from favorite files: " . $selectedItem, $blue, "ready");
             End(true);
         } else {
             // Remove folder from favorites
             Msg("Remove the following folder from the favorites?" . <crlf> . <crlf> . $selectedItem, 32 + 1); // Script will end if user clicks on Cancel
             Favs('d', $selectedItem, , 'd');
-            Status("Removed from favorite folders: " . $selectedItem, "0078D7", "ready");
+            Status("Removed from favorite folders: " . $selectedItem, $blue, "ready");
             End(true);
         }
     }
