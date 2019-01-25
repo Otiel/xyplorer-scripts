@@ -1,23 +1,10 @@
-/* Opens a list containing favorites folders and files to quickly go to the selected favorite.
+/* Opens a list containing "Favorites Files" (XYplorer definition ⇒ can contain folders and files) to quickly go to the selected favorite.
  */
 "OpenFavorite"
     // Constants
     $blue = "106FCD";
 
-    // Get favorite folders
-    $favoriteFolders = "";
-    foreach ($favoriteFolder, Favs('d',, '|'), '|', 'e') {
-        if ($favoriteFolder != '-') { // Ignore separators
-            // Remove caption (format is: "Caption" Path)
-            $favoriteFolders = $favoriteFolders . RegexReplace($favoriteFolder, "("".+"") *(.+)", "$2") . '|';
-        }
-    }
-    if ($favoriteFolders != "") {
-        $favoriteFolders = SubStr($favoriteFolders, 0, -1);
-        $favoriteFolders = FormatList($favoriteFolders, 's', '|');
-    }
-
-    // Get favorite files
+    // Get Favorite Files
     $favoriteFiles = "";
     foreach ($favoriteFile, Favs('f',, '|'), '|', 'e') {
         if ($favoriteFile != '-') { // Ignore separators
@@ -28,17 +15,8 @@
     if ($favoriteFiles != "") {
         $favoriteFiles = SubStr($favoriteFiles, 0, -1);
         $favoriteFiles = FormatList($favoriteFiles, 's', '|');
-    }
-
-    // Concat favorites folders and files
-    if ($favoriteFolders != "" && $favoriteFiles != "") {
-        $favorites = $favoriteFolders . '|' . $favoriteFiles;
-    } elseif ($favoriteFolders != "" && $favoriteFiles == "") {
-        $favorites = $favoriteFolders;
-    } elseif ($favoriteFolders == "" && $favoriteFiles != "") {
-        $favorites = $favoriteFiles;
     } else {
-        Msg("There are no favorite folders / files.", 64);
+        Msg("There are no Favorite Files.", 64);
         End(true);
     }
 
@@ -48,7 +26,7 @@
         "Press Shift to open a folder in a new tab." . <crlf> . 
         "Press Ctrl when selecting a file to open its parent folder (can be combined with Shift)." . <crlf> . 
         "Press Alt to remove the selected item from the favorites.", 
-        $favorites, '|', 1+32+64+4096,, 800, 500, "Open favorite");
+        $favoriteFiles, '|', 1+32+64+4096,, 800, 500, "Open favorite");
 
     // Get pressed modifiers
     $modifierShift = false;
@@ -79,29 +57,21 @@
         $selectedItemExist = false;
     }
 
+    $removeItem = false;
     if (!$selectedItemExist) {
-        Msg("The selected item does not exist. Would you like to remove it from the favorites?" . <crlf> . <crlf> . $selectedItem, 32 + 1); // Script will end if user clicks on Cancel
-        // We have no way of knowing if the item was a file or a folder, so try to remove it from both lists
-        Favs('f', $selectedItem, , 'd');
-        Favs('d', $selectedItem, , 'd');
-        Status("Removed from favorites: " . $selectedItem, $blue, "ready");
-        End(true);
+        Msg("The selected item does not exist. Would you like to remove it from the Favorites Files?" . <crlf> . <crlf> . $selectedItem, 32 + 1); // Script will end if user clicks on Cancel
+        $removeItem = true;
+    }
+    if ($modifierAlt) {
+        Msg("Remove the following item from the Favorite Files?" . <crlf> . <crlf> . $selectedItem, 32 + 1); // Script will end if user clicks on Cancel
+        $removeItem = true;
     }
 
-    if ($modifierAlt) {
-        if ($selectedItemIsAFile) {
-            // Remove file from favorites
-            Msg("Remove the following file from the favorites?" . <crlf> . <crlf> . $selectedItem, 32 + 1); // Script will end if user clicks on Cancel
-            Favs('f', $selectedItem, , 'd');
-            Status("Removed from favorite files: " . $selectedItem, $blue, "ready");
-            End(true);
-        } else {
-            // Remove folder from favorites
-            Msg("Remove the following folder from the favorites?" . <crlf> . <crlf> . $selectedItem, 32 + 1); // Script will end if user clicks on Cancel
-            Favs('d', $selectedItem, , 'd');
-            Status("Removed from favorite folders: " . $selectedItem, $blue, "ready");
-            End(true);
-        }
+    if ($removeItem) {
+        // Remove item from Favorite Files
+        Favs('f', $selectedItem, , 'd');
+        Status("Removed from Favorite Files: " . $selectedItem, $blue, "ready");
+        End(true);
     }
 
     if ($selectedItemIsAFile) {
