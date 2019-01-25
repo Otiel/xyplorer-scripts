@@ -61,8 +61,7 @@
     if (!$selectedItemExist) {
         Msg("The selected item does not exist. Would you like to remove it from the Favorites Files?" . <crlf> . <crlf> . $selectedItem, 32 + 1); // Script will end if user clicks on Cancel
         $removeItem = true;
-    }
-    if ($modifierAlt) {
+    } elseif ($modifierAlt) {
         Msg("Remove the following item from the Favorite Files?" . <crlf> . <crlf> . $selectedItem, 32 + 1); // Script will end if user clicks on Cancel
         $removeItem = true;
     }
