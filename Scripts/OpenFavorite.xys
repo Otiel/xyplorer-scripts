@@ -7,10 +7,11 @@
     // Get Favorite Files
     $favoriteFiles = "";
     foreach ($favoriteFile, Favs('f',, '|'), '|', 'e') {
-        if ($favoriteFile != '-') { // Ignore separators
-            // Remove caption (format is: "Caption" Path)
-            $favoriteFiles = $favoriteFiles . RegexReplace($favoriteFile, "("".+"") *(.+)", "$2") . '|';
+        if ($favoriteFile == '-') {// Ignore separators
+            continue;
         }
+        // Remove caption (format is: "Caption" Path)
+        $favoriteFiles = $favoriteFiles . RegexReplace($favoriteFile, "("".+"") *(.+)", "$2") . '|';
     }
     if ($favoriteFiles != "") {
         $favoriteFiles = SubStr($favoriteFiles, 0, -1);
