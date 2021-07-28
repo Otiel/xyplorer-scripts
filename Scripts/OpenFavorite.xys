@@ -6,17 +6,23 @@
 
     // Get Favorite Files
     $favoriteFiles = "";
-    foreach ($favoriteFile, Favs('f',, '|'), '|', 'e') {
-        if ($favoriteFile == '-') {// Ignore separators
+    foreach ($favoriteFile, Favs('f',, '|'), '|', 'e')
+    {
+        if ($favoriteFile == '-')
+        {
+            // Ignore separators
             continue;
         }
         // Remove caption (format is: "Caption" Path)
         $favoriteFiles = $favoriteFiles . RegexReplace($favoriteFile, "("".+"") *(.+)", "$2") . '|';
     }
-    if ($favoriteFiles != "") {
+    if ($favoriteFiles != "")
+    {
         $favoriteFiles = SubStr($favoriteFiles, 0, -1);
         $favoriteFiles = FormatList($favoriteFiles, 's', '|');
-    } else {
+    }
+    else
+    {
         Msg("There are no Favorite Files.", 64);
         End(true);
     }
@@ -33,35 +39,51 @@
     $modifierShift = false;
     $modifierCtrl = false;
     $modifierAlt = false;
-    if (Get("Shift") == 1) {
+    if (Get("Shift") == 1)
+    {
         $modifierShift = true;
-    } elseif (Get("Shift") == 2) {
+    }
+    elseif (Get("Shift") == 2)
+    {
         $modifierCtrl = true;
-    } elseif (Get("Shift") == 3) {
+    }
+    elseif (Get("Shift") == 3)
+    {
         $modifierShift = true;
         $modifierCtrl = true;
-    } elseif (Get("Shift") == 4) {
+    }
+    elseif (Get("Shift") == 4)
+    {
         $modifierAlt = true;
     }
 
     // Get item type (file / folder)
-    if (Exists($selectedItem) == 1) {
+    if (Exists($selectedItem) == 1)
+    {
         // This is a file
         $selectedItemExist = true;
         $selectedItemIsAFile = true;
-    } elseif (Exists($selectedItem) == 2) {
+    }
+    elseif (Exists($selectedItem) == 2)
+    {
         // This is a folder or drive
         $selectedItemExist = true;
         $selectedItemIsAFile = false;
-    } else {
+    }
+    else
+    {
         // Item doesn't exist
         $selectedItemExist = false;
     }
 
-    if (!$selectedItemExist || $modifierAlt) {
-        if (!$selectedItemExist) {
+    if (!$selectedItemExist || $modifierAlt)
+    {
+        if (!$selectedItemExist)
+        {
             Msg("The selected item does not exist. Would you like to remove it from the Favorites Files?" . <crlf> . <crlf> . $selectedItem, 32 + 1); // Script will end if user clicks on Cancel
-        } elseif ($modifierAlt) {
+        }
+        elseif ($modifierAlt)
+        {
             Msg("Remove the following item from the Favorite Files?" . <crlf> . <crlf> . $selectedItem, 32 + 1); // Script will end if user clicks on Cancel
         }
         // Remove item from Favorite Files
@@ -70,22 +92,33 @@
         End(true);
     } 
 
-    if ($selectedItemIsAFile) {
-        if ($modifierCtrl && $modifierShift) {
+    if ($selectedItemIsAFile)
+    {
+        if ($modifierCtrl && $modifierShift)
+        {
             // Open parent folder in new tab
             Tab("new", GetPathComponent($selectedItem, "path"));
-        } elseif ($modifierCtrl && !$modifierShift) {
+        }
+        elseif ($modifierCtrl && !$modifierShift)
+        {
             // Open parent folder in current tab
             Goto(GetPathComponent($selectedItem, "path"));
-        } else {
+        }
+        else
+        {
             // Open file
             open $selectedItem;
         }
-    } else {
-        if ($modifierShift) {
+    }
+    else
+    {
+        if ($modifierShift)
+        {
             // Open in new tab
             Tab("new", $selectedItem);
-        } else {
+        }
+        else
+        {
             // Open in current tab
             Goto($selectedItem);
         }

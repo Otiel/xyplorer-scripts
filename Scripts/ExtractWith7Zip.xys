@@ -6,23 +6,28 @@
  */
 "ExtractWith7Zip"
     // Check if there's a file/folder selected
-    if (Get("CountSelected") == 0) {
+    if (Get("CountSelected") == 0)
+    {
         Msg("Please select at least one file to extract.", 16);
         End(1);
     }
 
     $filesPaths = Get('SelectedItemsPathNames', '|');
-    foreach ($filePath, $filesPaths, "|") {
+    foreach ($filePath, $filesPaths, "|")
+    {
         // Get the list of files/folders present in the root of the zip file
         $zipContent = Zip_List2($filePath);
 
         // Compute the number of files/folders present in the root of the zip file
         $filesInZipRoot = GetToken($zipContent, "count", "|");
 
-        if ($filesInZipRoot > 1) {
+        if ($filesInZipRoot > 1)
+        {
             // Extract to a new folder
             Run("""C:\Program Files\7-Zip\7zG.exe"" x ""$filePath"" -o*");
-        } else {
+        }
+        else
+        {
             // Extract to the current folder
             Run("""C:\Program Files\7-Zip\7zG.exe"" x ""$filePath"" -o""<curpath>""");
         }
