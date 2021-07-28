@@ -1,9 +1,0 @@
-/* Runs Cmder in the current folder.
- */
-"RunCmderInCurrentFolder"
-    $cmderPath = Property("#ShortcutTarget", "<xydata>\Shortcuts\Cmder.exe.lnk");
-    $cmderFolderPath = GetPathComponent($cmderPath, "parent");
-    $cfgFilePath = $cmderFolderPath . "\config\ConEmu.xml";
-    $conEmuPath = $cmderFolderPath . "\vendor\conemu-maximus5\ConEmu.exe";
-
-    run "$conEmuPath -Icon $cmderPath -Title Cmder -LoadCfgFile $cfgFilePath -Reuse -Dir <curpath>"
