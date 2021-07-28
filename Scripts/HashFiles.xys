@@ -42,8 +42,8 @@
     foreach ($filePath, $filesPaths, "|") {
         // Store file path and size in results
         $fileSize = FileSize($filePath);
-        $fileSizeTxt = FormatBytes($fileSize) . " (" . Format($fileSize, "0,###") . " bytes)";
-        $results = $results . "File:    " . $filePath . <br> . "Size:    " . $fileSizeTxt . <br>;
+        $fileSizeTxt = FormatBytes($fileSize)." (".Format($fileSize, "0,###")." bytes)";
+        $results = $results."File:    ".$filePath.<br>."Size:    ".$fileSizeTxt.<br>;
 
         foreach ($hashAlgo, $hashAlgos, "|") {
             // Transform the hash algorithm string to the hash algorithm known by XYplorer
@@ -84,11 +84,11 @@
             }
 
             // Store result for this hash
-            $results = $results . $hashAlgoText . $hashValue . " (" . $duration . $durationUnit . ")" . <br>;
+            $results = $results.$hashAlgoText.$hashValue." (".$duration.$durationUnit.")".<br>;
         }
 
         // Store result for this file
-        $results = $results . <br>;
+        $results = $results.<br>;
     }
 
     // Adapt window width depending on selected hash types
