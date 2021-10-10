@@ -1,0 +1,78 @@
+/* Sets the modified date of the selected files to the date extracted from the file names.
+ *
+ * File name must be in the following format: YYYYMMDD_hhmmss
+ */
+"SetModifiedDateToFileName"
+    // Check if there's a file/folder selected
+    if (Get("CountSelected") == 0)
+    {
+        Msg("Please select at least one file or folder containing files.", 16);
+        End(1);
+    }
+
+    // Remove the folders from the list of selected paths
+    $filesPaths = "";
+    foreach ($path, Get('SelectedItemsPathNames', '|'), "|")
+    {
+        if (FileType($path) == "Nofile")
+        {
+            // Not an existing file => probably a folder
+
+            // Get (recursively) the files contained in the folder
+            $folderContainedFiles = FolderReport("files", "return", $path, "r",, "|");
+
+            if ($folderContainedFiles != "")
+            {
+                foreach ($folderFilePath, $folderContainedFiles, "|")
+                {
+                    $filesPaths = $filesPaths.$folderFilePath."|";
+                }
+            }
+        }
+        else
+        {
+            // A file
+            $filesPaths = $filesPaths.$path."|";
+        }
+    }
+    $filesPaths = SubStr($filesPaths, 0, -1);
+
+    // Check if there's a file selected
+    if ($filesPaths == "")
+    {
+        Msg("No file found in the selection.".<br>."Select at least one file or folder containing a file.", 16);
+        End(1);
+    }
+
+    foreach ($filePath, $filesPaths, "|")
+    {
+        // Get file name
+        $fileName = GetPathComponent($filePath, "file");
+        $fileNameWithoutExtension = GetPathComponent($filePath, "base");
+
+        // Get date
+        $regexPattern = "(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})";
+	    $replaceBy = "$3/$2/$1 $4:$5:$6"; // Must be in a format that the local system can understand.
+	    $date = RegexReplace($fileNameWithoutExtension, $regexPattern, $replaceBy);
+
+        // Ask user for confirmation
+        $confirmationMessage = "Set modified date for the following file?" . <crlf>.<crlf> . $filePath . <crlf>.<crlf> . $date;
+        $userChoice = Confirm($confirmationMessage, "", 1, 3);
+
+        if ($userChoice == 0) // "No"
+        {
+            Status("Unchanged modified date for " . $fileName,, "alert");
+            continue;
+        }
+        elseif ($userChoice == 1) // "Yes"
+        {
+            // Set "Modified" date
+            Timestamp(m, $date, $filePath);
+            Status("Changed modified date for " . $fileName,, "ready");
+        }
+        elseif ($userChoice == 2) // "Cancel"
+        {
+            Status("Set modified date script cancelled", "FF0000", "stop");
+            End(1);
+        }
+    }
