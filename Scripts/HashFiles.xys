@@ -1,3 +1,102 @@
+include "Libraries\File"
+
+/// Ask the user to select one or several hash algorithms.
+/// Returns the list of selected algorithms.
+///
+/// - separator: the separator to use between returned algorithm
+function AskForHashAlgorithms($separator)
+{
+    $hashAlgorithms = "";
+    while ($hashAlgorithms == "")
+    {
+        $hashAlgorithms = InputSelect("Select the hash algorithm(s) to calculate", "CRC-32|+MD5|SHA-1|SHA-256|SHA-512", $separator, 2,, 300, 250, "Hash files");
+        if ($hashAlgorithms == "")
+        {
+            Msg("Please select at least one hash algorithm to calculate.", 16);
+        }
+    }
+
+    return $hashAlgorithms;
+}
+
+/// Returns the hash algorithm in XY format from the specified algorithm.
+/// Supported algorithms are:
+/// "CRC-32"
+/// "MD5"
+/// "SHA-1"
+/// "SHA-256"
+/// "SHA-512"
+function GetHashAlgorithmInXYFormat($hashAlgorithm)
+{
+    switch ($hashAlgorithm)
+    {
+        case "CRC-32":
+            $hashAlgo = "crc32";
+            break;
+        case "MD5":
+            $hashAlgo = "md5";
+            break;
+        case "SHA-1":
+            $hashAlgo = "sha1";
+            break;
+        case "SHA-256":
+            $hashAlgo = "sha256";
+            break;
+        case "SHA-512":
+            $hashAlgo = "sha512";
+            break;
+    }
+
+    return $hashAlgo;
+}
+
+/// Returns the hash algorithm padded with spaces in order to have a fixed string length, no matter the algorithm.
+/// Supported algorithms are:
+/// "CRC-32"
+/// "MD5"
+/// "SHA-1"
+/// "SHA-256"
+/// "SHA-512"
+function PadRightHashAlgorithm($hashAlgorithm)
+{
+    switch ($hashAlgorithm)
+    {
+        case "CRC-32":
+            $hashAlgo = "CRC-32:  ";
+            break;
+        case "MD5":
+            $hashAlgo = "MD5:     ";
+            break;
+        case "SHA-1":
+            $hashAlgo = "SHA-1:   ";
+            break;
+        case "SHA-256":
+            $hashAlgo = "SHA-256: ";
+            break;
+        case "SHA-512":
+            $hashAlgo = "SHA-512: ";
+            break;
+    }
+
+    return $hashAlgo;
+}
+
+/// Returns a human readable timespan computed from the difference between $endDate and $startDate
+/// Returns the time in milliseconds if less than 1 second, else returns the time in seconds.
+function GetHumanReadableTimespan($startDate, $endDate)
+{
+    $timespan = DateDiff($startDate, $endDate, "ms");
+    $unit = "ms";
+
+    if ($timespan >= 1000)
+    {
+        $timespan = Format($timespan / 1000, "0.00"); // Keep two digits behind comma
+        $unit = "s";
+    }
+
+    return $timespan.$unit;
+}
+
 /* Computes hash values for the selected files.
  *
  * The hash algorithm can be several of the following:
@@ -7,109 +106,43 @@
  * - SHA-256
  * - SHA-512
  */
- "HashFiles"
-    // Check if there's a file/folder selected
-    if (Get("CountSelected") == 0)
-    {
-        Msg("Please select at least one file or folder to calculate the hash.", 16);
-        End(1);
-    }
+"HashFiles"
+    // Get selected files
+    $filesSeparator = "|";
+    $filesPaths = GetSelectedFilesRecursively($filesSeparator);
 
-    // Remove the folders from the list of selected paths
-    $filesPaths = "";
-    foreach ($path, Get('SelectedItemsPathNames', '|'), "|")
-    {
-        if (FileType($path) == "Nofile")
-        {
-            // Not an existing file => probably a folder
-
-            // Get (recursively) the files contained in the folder
-            $folderContainedFiles = FolderReport("files", "return", $path, "r",, "|");
-
-            if ($folderContainedFiles != "")
-            {
-                foreach ($folderFilePath, $folderContainedFiles, "|")
-                {
-                    $filesPaths = $filesPaths.$folderFilePath."|";
-                }
-            }
-        }
-        else
-        {
-            // A file
-            $filesPaths = $filesPaths.$path."|";
-        }
-    }
-    $filesPaths = SubStr($filesPaths, 0, -1);
-
-    // Check if there's a file selected
     if ($filesPaths == "")
     {
-        Msg("No file found in the selection to calculate the hash.".<br>."Select at least one file or folder containing a file.", 16);
+        Msg("No file found in the selection.".<br>."Select at least one file or folder containing a file.", 16);
         End(1);
     }
 
-    // Ask user to select hash algorithm(s)
-    $hashAlgos = "";
-    while ($hashAlgos == "")
-    {
-        $hashAlgos = InputSelect("Select the hash algorithm(s) to calculate", "CRC-32|+MD5|SHA-1|SHA-256|SHA-512", "|", 2,, 300, 250, "Hash files");
-        if ($hashAlgos == "")
-        {
-            Msg("Please select at least one hash algorithm to calculate.", 16);
-        }
-    }
+    // Ask for hash algorithms
+    $hashesSeparator = "|";
+    $hashAlgos = AskForHashAlgorithms($hashesSeparator);
 
     $results = "";
-    foreach ($filePath, $filesPaths, "|")
+    foreach ($filePath, $filesPaths, $filesSeparator)
     {
         // Store file path and size in results
         $fileSize = FileSize($filePath);
         $fileSizeTxt = FormatBytes($fileSize)." (".Format($fileSize, "0,###")." bytes)";
         $results = $results."File:    ".$filePath.<br>."Size:    ".$fileSizeTxt.<br>;
 
-        foreach ($hashAlgo, $hashAlgos, "|")
+        foreach ($hashAlgo, $hashAlgos, $hashesSeparator)
         {
-            // Transform the hash algorithm string to the hash algorithm known by XYplorer
-            switch ($hashAlgo) {
-                case "CRC-32":
-                    $hashAlgoXY = "crc32";
-                    $hashAlgoText = "CRC-32:  ";
-                    break;
-                case "MD5":
-                    $hashAlgoXY = "md5";
-                    $hashAlgoText = "MD5:     ";
-                    break;
-                case "SHA-1":
-                    $hashAlgoXY = "sha1";
-                    $hashAlgoText = "SHA-1:   ";
-                    break;
-                case "SHA-256":
-                    $hashAlgoXY = "sha256";
-                    $hashAlgoText = "SHA-256: ";
-                    break;
-                case "SHA-512":
-                    $hashAlgoXY = "sha512";
-                    $hashAlgoText = "SHA-512: ";
-                    break;
-            }
+            $hashAlgoXY = GetHashAlgorithmInXYFormat($hashAlgo);
 
             // Compute hash
-            $startTime = <date yyyy-mm-dd hh:nn:ss.fff>;
+            $startDate = <date yyyy-mm-dd hh:nn:ss.fff>;
             $hashValue = Hash($hashAlgoXY, $filePath, 3);
-            $endTime = <date yyyy-mm-dd hh:nn:ss.fff>;
+            $endDate = <date yyyy-mm-dd hh:nn:ss.fff>;
 
-            // Compute duration
-            $duration = DateDiff($startTime, $endTime, "ms");
-            $durationUnit = "ms";
-            if ($duration >= 1000)
-            {
-                $duration = Format($duration / 1000, "0.00"); // Keep two digits behind comma
-                $durationUnit = "s";
-            }
+            $durationText = GetHumanReadableTimespan($startDate, $endDate);
+            $hashAlgoText = PadRightHashAlgorithm($hashAlgo);
 
             // Store result for this hash
-            $results = $results.$hashAlgoText.$hashValue." (".$duration.$durationUnit.")".<br>;
+            $results = $results.$hashAlgoText.$hashValue." (".$durationText.")".<br>;
         }
 
         // Store result for this file

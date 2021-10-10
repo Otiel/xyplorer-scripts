@@ -1,43 +1,12 @@
+include "Libraries\File"
+
 /* Sets the modified date of the selected files to the date extracted from the file names.
  *
  * File name must be in the following format: YYYYMMDD_hhmmss
  */
 "SetModifiedDateToFileName"
-    // Check if there's a file/folder selected
-    if (Get("CountSelected") == 0)
-    {
-        Msg("Please select at least one file or folder containing files.", 16);
-        End(1);
-    }
+    $filesPaths = GetSelectedFilesRecursively("|");
 
-    // Remove the folders from the list of selected paths
-    $filesPaths = "";
-    foreach ($path, Get('SelectedItemsPathNames', '|'), "|")
-    {
-        if (FileType($path) == "Nofile")
-        {
-            // Not an existing file => probably a folder
-
-            // Get (recursively) the files contained in the folder
-            $folderContainedFiles = FolderReport("files", "return", $path, "r",, "|");
-
-            if ($folderContainedFiles != "")
-            {
-                foreach ($folderFilePath, $folderContainedFiles, "|")
-                {
-                    $filesPaths = $filesPaths.$folderFilePath."|";
-                }
-            }
-        }
-        else
-        {
-            // A file
-            $filesPaths = $filesPaths.$path."|";
-        }
-    }
-    $filesPaths = SubStr($filesPaths, 0, -1);
-
-    // Check if there's a file selected
     if ($filesPaths == "")
     {
         Msg("No file found in the selection.".<br>."Select at least one file or folder containing a file.", 16);
