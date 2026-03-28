@@ -4,12 +4,22 @@ include "Libraries\File"
  *
  * File name must be in the following format: YYYYMMDD_hhmmss
  */
-"SetModifiedDateToFileName"
+"SetModifiedDateFromFileName"
     $filesPaths = GetSelectedFilesRecursively("|");
 
     if ($filesPaths == "")
     {
         Msg("No file found in the selection.".<br>."Select at least one file or folder containing a file.", 16);
+        End(1);
+    }
+
+    // Ask user if he wants to confirm modification for each file
+    $confirmForEachFileMessage = "Ask for confirmation for each file? If No, the script will run on all selected file without asking for your confirmation.";
+    $confirmForEachFile = Confirm($confirmForEachFileMessage, "", 1, 3);
+
+    if ($confirmForEachFile == 2) // "Cancel"
+    {
+        Status("Set modified date script cancelled", "FF0000", "stop");
         End(1);
     }
 
@@ -24,24 +34,36 @@ include "Libraries\File"
 	    $replaceBy = "$3/$2/$1 $4:$5:$6"; // Must be in a format that the local system can understand.
 	    $date = RegexReplace($fileNameWithoutExtension, $regexPattern, $replaceBy);
 
-        // Ask user for confirmation
-        $confirmationMessage = "Set modified date for the following file?" . <crlf>.<crlf> . $filePath . <crlf>.<crlf> . $date;
-        $userChoice = Confirm($confirmationMessage, "", 1, 3);
+        if ($confirmForEachFile == 1) // "Yes"
+        {
+            // Ask user for confirmation
+            $confirmationMessage = "Set modified date for the following file?" . <crlf>.<crlf> . $filePath . <crlf>.<crlf> . $date;
+            $confirm = Confirm($confirmationMessage, "", 1, 3);
+        }
+        else
+        {
+            $confirm = 1;
+        }
 
-        if ($userChoice == 0) // "No"
+        if ($confirm == 0) // "No"
         {
             Status("Unchanged modified date for " . $fileName,, "alert");
             continue;
         }
-        elseif ($userChoice == 1) // "Yes"
+        elseif ($confirm == 1) // "Yes"
         {
             // Set "Modified" date
             Timestamp(m, $date, $filePath);
             Status("Changed modified date for " . $fileName,, "ready");
         }
-        elseif ($userChoice == 2) // "Cancel"
+        elseif ($confirm == 2) // "Cancel"
         {
             Status("Set modified date script cancelled", "FF0000", "stop");
             End(1);
         }
     }
+
+/* Sets the file name of the selected files to their "Modified" date.
+ */
+"SetFileNameFromModifiedDate"
+    rename b, '<datem yyyymmdd_hhnnss>', p;

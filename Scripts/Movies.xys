@@ -1,0 +1,107 @@
+/// Returns the movie name with its year from its release name
+function GetMovieNameWithYear($itemName)
+{
+    // Split item name on dots
+    $wordSeparator = "|";
+    $words = RegexMatches($itemName, "[^\.]+", $wordSeparator);
+
+    $movieNameAndYear = "";
+    foreach ($word, $words, $wordSeparator)
+    {
+        if (RegexMatches($word, "[0-9]{4}") != "")
+        {
+            // This is the year
+            $year = $word;
+            $movieNameAndYear = $movieNameAndYear."(".$year.")";
+            break;
+        }
+        else
+        {
+            // This is still part of the movie name
+            $movieNameAndYear = $movieNameAndYear.$word." ";
+        }
+    }
+
+    return $movieNameAndYear
+}
+
+/// Copies the selected file to specified share by creating a new folder with the movie name.
+function CopyMovieToNewFolder($shareFolderName)
+{
+    if (Get("CountSelected") != 1)
+    {
+        Msg("Select exactly one file to copy to ".$shareFolderName." share.", 16);
+        End(1);
+    }
+
+    $itemPath = Get("SelectedItemsPathNames");
+    $itemName = Get("SelectedItemsNames");
+
+    if (FileType($itemPath) == "Nofile")
+    {
+        // Not an existing file => probably a folder
+        Msg("Select exactly one file to copy to ".$shareFolderName." share.", 16);
+        End(1);
+    }
+
+    $movie = GetMovieNameWithYear($itemName);
+    $destinationFolder = "S:\".$shareFolderName."\".$movie;
+    $destinationPath = $destinationFolder."\".$itemName;
+    $displayedDestinationPath = "S:\".$shareFolderName."\".$movie."\".<crlf>.$itemName;
+
+    if (Exists($destinationPath) != 0)
+    {
+        $errorMessage = "Item already exists at:" . <crlf>.<crlf> . $displayedDestinationPath . <crlf>.<crlf> . "Exiting now.";
+        Msg($errorMessage, 16);
+        End(1);
+    }
+
+    // Ask user for confirmation
+    $confirmationMessage = "Copy selected file to the following path?" . <crlf>.<crlf> . $displayedDestinationPath;
+    $confirm = Confirm($confirmationMessage, "", 1, 1);
+
+    if ($confirm != 1)
+    {
+        // User cancelled
+        End(1);
+    }
+
+    CopyAs("*.?", $destinationFolder, $itemPath); // Use CopyAs instead of CopyItem : it silently creates the folder + jobs are processed in the background + queued by XYplorer
+}
+
+/* Set to clipboard the movie name from a release name.
+ *
+ * A release is named e.g.: 
+ *     Mission.Impossible.Ghost.Protocol.2011.MULTi.TRUEFRENCH.1080p.BluRay.x264-LOST
+ * We try to extract from the release name the movie name and its year in order to set to the clipboard the movie name with the following format:
+ *     Mission Impossible Ghost Protocol (2011)
+ */
+"SetMovieNameToClipboard"
+    $itemsSeparator = "|";
+    $itemsNames = Get('SelectedItemsNames', $itemsSeparator);
+
+    if ($itemsNames == "")
+    {
+        Msg("No item (file / folder) found in the selection.".<br>."Select at least one file or folder.", 16);
+        End(1);
+    }
+
+    $movies = "";
+    foreach ($itemName, $itemsNames, $itemsSeparator)
+    {
+        $movie = GetMovieNameWithYear($itemName);
+        $movies = $movies.$movie.<br>;
+    }
+
+    // Set to clipboard
+    CopyText($movies)
+
+/* Copy selected file to "Movies" share by creating a new folder with the movie name.
+ */
+"CopyMovieToNewFolder"
+    CopyMovieToNewFolder("Movies")
+
+/* Copy selected file to "Animations" share by creating a new folder with the movie name.
+ */
+"CopyAnimationToNewFolder"
+    CopyMovieToNewFolder("Animations")
