@@ -67,3 +67,49 @@ include "Libraries\File"
  */
 "SetFileNameFromModifiedDate"
     rename b, '<datem yyyymmdd_hhnnss>', p;
+
+/* Sets the EXIF "Taken Date" of the selected files to the date extracted from the file names.
+ *
+ * File name must be in the following format: YYYYMMDD_hhmmss
+ */
+"SetExifTakenDateFromFileName_YYYYMMDD_HHMMSS"
+    $filesPaths = GetSelectedFilesRecursively('" "'); // use " " as separator in order to pass the list of files to the ExifTool command
+
+    if ($filesPaths == "")
+    {
+        Msg("No file found in the selection.".<br>."Select at least one file or folder containing a file.", 16);
+        End(1);
+    }
+
+    $exifTool = "C:\Program Files\exifTool\exifTool.exe";
+
+    run 'cmd /k ' . // Run "cmd /k" to open the command in a new console to keep it open at the end, in case there are some errors
+        '"' . // Start of command
+        '"' . $exifTool . '" ' . // ExifTool executable
+        '"-DateTimeOriginal<Basename" ' . // Edit DateTimeOriginal (= Exif "Date taken") from Basename
+        '-d "%Y%m%d_%H%M%S" ' . // Pattern used to extract the date from Basename
+        '"' . $filesPaths . '"' . // List of files to edit
+        '"'; // End of command
+
+/* Sets the EXIF "Taken Date" of the selected files to the date extracted from the file names.
+ *
+ * File name must be in the following format: IMG_YYYYMMDD_hhmmss
+ */
+"SetExifTakenDateFromFileName_IMG_YYYYMMDD_HHMMSS"
+    $filesPaths = GetSelectedFilesRecursively('" "'); // use " " as separator in order to pass the list of files to the ExifTool command
+
+    if ($filesPaths == "")
+    {
+        Msg("No file found in the selection.".<br>."Select at least one file or folder containing a file.", 16);
+        End(1);
+    }
+
+    $exifTool = "C:\Program Files\exifTool\exifTool.exe";
+
+    run 'cmd /k ' . // Run "cmd /k" to open the command in a new console to keep it open at the end, in case there are some errors
+        '"' . // Start of command
+        '"' . $exifTool . '" ' . // ExifTool executable
+        '"-DateTimeOriginal<Basename" ' . // Edit DateTimeOriginal (= Exif "Date taken") from Basename
+        '-d "IMG_%Y%m%d_%H%M%S" ' . // Pattern used to extract the date from Basename
+        '"' . $filesPaths . '"' . // List of files to edit
+        '"'; // End of command
