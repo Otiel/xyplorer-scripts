@@ -1,0 +1,12 @@
+/* Opens the selected item in Everything.
+ * If no item is selected, opens the current directory in Everything.
+ */
+"OpenInEverything"
+    if (<selitems>)
+    {
+        run """<xydata>\Shortcuts\Everything.exe.lnk"" <selitems>";
+    }
+    else
+    {
+        run """<xydata>\Shortcuts\Everything.exe.lnk"" <curpath>";
+    }
