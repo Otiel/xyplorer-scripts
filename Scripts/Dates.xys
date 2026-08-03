@@ -113,3 +113,34 @@ include "Libraries\File"
         '-d "IMG_%Y%m%d_%H%M%S" ' . // Pattern used to extract the date from Basename
         '"' . $filesPaths . '"' . // List of files to edit
         '"'; // End of command
+
+/* Add (or replace if needed) the today's date at the start of the name of the selected files/folders.
+ */
+"AddTodayDateInFileName"
+    // Check if there's a file/folder selected
+    if (Get("CountSelected") == 0)
+    {
+        Msg("Please select at least one file / folder to rename.", 16);
+        End(1);
+    }
+
+    $now = <date yyyy-mm-dd>;
+    $itemsPaths = Get('SelectedItemsPathNames', '|');
+
+    foreach ($itemPath, $itemsPaths, "|")
+    {
+        $itemName = GetPathComponent($itemPath, "file");
+
+        if (RegexMatches($itemName, "^\d{4}-\d{2}-\d{2}") != "")
+        {
+            // There's already a date at the start of the item name, replace it
+            $newItemName = RegexReplace($itemName, "^\d{4}-\d{2}-\d{2}", $now);
+        }
+        else
+        {
+            // Prepend today's date to the item name
+            $newItemName = $now . " " . $itemName;
+        }
+
+        RenameItem($newItemName, $itemPath);
+    }
